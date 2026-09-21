@@ -32,7 +32,7 @@ export async function onRequestPost(context) {
                 },
                 body: JSON.stringify({
                     from: "Barbara Pesce <onboarding@resend.dev>",
-                    to: ["Bar.k.p@hotmail.com"],
+                    to: ["arturodburin95@gmail.com"],
                     reply_to: email,
                     subject: `Nueva consulta de ${name}`,
                     html: `
