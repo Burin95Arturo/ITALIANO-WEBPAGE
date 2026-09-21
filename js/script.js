@@ -1,4 +1,3 @@
-```javascript
 /* =====================================================
    LANGUAGE
 ===================================================== */
@@ -128,31 +127,143 @@ const contactForm = document.querySelector("#contact-form");
 const formMessage = document.querySelector("#form-message");
 
 
-contactForm.addEventListener("submit", (event) => {
+contactForm.addEventListener("submit", async (event) => {
 
     event.preventDefault();
 
     /*
-        Por ahora solamente mostramos
-        un mensaje.
+        Deshabilitamos el botón mientras se envía
+        para evitar múltiples envíos.
+    */
 
-        Más adelante reemplazaremos esto
-        por el envío mediante Resend.
+    const submitButton = contactForm.querySelector(
+        'button[type="submit"]'
+    );
+
+    submitButton.disabled = true;
+
+
+    /*
+        Mensaje temporal mientras se procesa
+        la consulta.
     */
 
     if (currentLanguage === "es") {
 
         formMessage.textContent =
-            "Gracias por tu consulta. Te responderemos pronto.";
+            "Enviando tu consulta...";
 
     } else {
 
         formMessage.textContent =
-            "Grazie per la tua richiesta. Ti risponderemo presto.";
+            "Invio della richiesta...";
 
     }
 
-    contactForm.reset();
+
+    try {
+
+        /*
+            Tomamos todos los datos del formulario.
+        */
+
+        const formData = new FormData(contactForm);
+
+
+        /*
+            Enviamos los datos a nuestra
+            Cloudflare Function.
+        */
+
+        const response = await fetch("/api/submit", {
+
+            method: "POST",
+
+            body: formData
+
+        });
+
+
+        /*
+            Convertimos la respuesta a JSON.
+        */
+
+        const result = await response.json();
+
+
+        /*
+            Si Cloudflare + Resend respondieron
+            correctamente.
+        */
+
+        if (response.ok && result.success) {
+
+            if (currentLanguage === "es") {
+
+                formMessage.textContent =
+                    "¡Gracias por tu consulta! Te responderemos pronto.";
+
+            } else {
+
+                formMessage.textContent =
+                    "Grazie per la tua richiesta! Ti risponderemo presto.";
+
+            }
+
+            contactForm.reset();
+
+
+        } else {
+
+            /*
+                El servidor respondió pero
+                hubo un problema con el envío.
+            */
+
+            if (currentLanguage === "es") {
+
+                formMessage.textContent =
+                    "No pudimos enviar tu consulta. Intentá nuevamente.";
+
+            } else {
+
+                formMessage.textContent =
+                    "Non è stato possibile inviare la richiesta. Riprova.";
+
+            }
+
+        }
+
+
+    } catch (error) {
+
+        /*
+            Error de conexión o de la Function.
+        */
+
+        console.error("Error enviando formulario:", error);
+
+
+        if (currentLanguage === "es") {
+
+            formMessage.textContent =
+                "Ocurrió un error. Intentá nuevamente.";
+
+        } else {
+
+            formMessage.textContent =
+                "Si è verificato un errore. Riprova.";
+
+        }
+
+    }
+
+
+    /*
+        Volvemos a habilitar el botón.
+    */
+
+    submitButton.disabled = false;
 
 });
 
@@ -163,4 +274,3 @@ contactForm.addEventListener("submit", (event) => {
 
 document.querySelector("#year").textContent =
     new Date().getFullYear();
-```
