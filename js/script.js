@@ -114,115 +114,89 @@ courseButtons.forEach(button => {
 const contactForm = document.querySelector("#contact-form");
 const formMessage = document.querySelector("#form-message");
 
-
 if (contactForm) {
-
     contactForm.addEventListener("submit", async (event) => {
-
         event.preventDefault();
 
-        const submitButton = contactForm.querySelector(
-            'button[type="submit"]'
-        );
+        // 1. Captura de elementos
+        const emailInput = contactForm.querySelector("#email");
+        const courseSelect = contactForm.querySelector("#course");
+        const submitButton = contactForm.querySelector('button[type="submit"]');
 
+        // 2. Validación de Email
+        const emailValue = emailInput ? emailInput.value.trim() : "";
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+
+        if (!emailValue || !emailRegex.test(emailValue)) {
+            formMessage.textContent = currentLanguage === "es"
+                ? "Por favor, ingresá un correo electrónico válido."
+                : "Per favore, inserisci un indirizzo email valido.";
+            if (emailInput) emailInput.focus();
+            return; // Frena el envío
+        }
+
+        // 3. Validación de Curso / Motivo seleccionado
+        const courseValue = courseSelect ? courseSelect.value : "";
+
+        if (!courseValue) {
+            formMessage.textContent = currentLanguage === "es"
+                ? "Por favor, seleccioná un curso o motivo de consulta."
+                : "Per favore, seleziona un corso o un motivo di richiesta.";
+            if (courseSelect) courseSelect.focus();
+            return; // Frena el envío
+        }
+
+        // 4. Si pasa las validaciones, procede con el envío
         if (submitButton) {
             submitButton.disabled = true;
         }
 
-
         if (currentLanguage === "es") {
-
-            formMessage.textContent =
-                "Enviando tu consulta...";
-
+            formMessage.textContent = "Enviando tu consulta...";
         } else {
-
-            formMessage.textContent =
-                "Invio della richiesta...";
-
+            formMessage.textContent = "Invio della richiesta...";
         }
 
-
         try {
-
             const formData = new FormData(contactForm);
 
             const response = await fetch("/api/submit", {
-
                 method: "POST",
-
                 body: formData
-
             });
-
 
             const result = await response.json();
 
-
             if (response.ok && result.success) {
-
                 if (currentLanguage === "es") {
-
-                    formMessage.textContent =
-                        "¡Gracias por tu consulta! Te responderemos pronto.";
-
+                    formMessage.textContent = "¡Gracias por tu consulta! Te responderemos pronto.";
                 } else {
-
-                    formMessage.textContent =
-                        "Grazie per la tua richiesta! Ti risponderemo presto.";
-
+                    formMessage.textContent = "Grazie per la tua richiesta! Ti risponderemo presto.";
                 }
-
                 contactForm.reset();
-
             } else {
-
                 if (currentLanguage === "es") {
-
-                    formMessage.textContent =
-                        "No pudimos enviar tu consulta. Intentá nuevamente.";
-
+                    formMessage.textContent = "No pudimos enviar tu consulta. Intentá nuevamente.";
                 } else {
-
-                    formMessage.textContent =
-                        "Non è stato possibile inviare la richiesta. Riprova.";
-
+                    formMessage.textContent = "Non è stato possibile inviare la richiesta. Riprova.";
                 }
-
                 console.error("Server error:", result);
-
             }
-
 
         } catch (error) {
-
-            console.error(
-                "Error enviando formulario:",
-                error
-            );
-
+            console.error("Error enviando formulario:", error);
 
             if (currentLanguage === "es") {
-
-                formMessage.textContent =
-                    "Ocurrió un error. Intentá nuevamente.";
-
+                formMessage.textContent = "Ocurrió un error. Intentá nuevamente.";
             } else {
-
-                formMessage.textContent =
-                    "Si è verificato un errore. Riprova.";
-
+                formMessage.textContent = "Si è verificato un errore. Riprova.";
             }
-
         }
-
 
         if (submitButton) {
             submitButton.disabled = false;
         }
-
     });
-
 }
 
 
